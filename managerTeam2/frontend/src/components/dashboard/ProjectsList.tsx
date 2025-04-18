@@ -49,9 +49,17 @@ export const ProjectsList = () => {
     fetchRecentProjects();
   }, []);
 
-  // Função para calcular o progresso do projeto (simulado por enquanto)
+  // Função para calcular o progresso do projeto com base nas tarefas concluídas
   const calculateProgress = (project: Project) => {
-    return Math.floor(Math.random() * 100);
+    if (!project.tasks || project.tasks.length === 0) {
+      return 0;
+    }
+
+    // Contar tarefas concluídas
+    const completedTasks = project.tasks.filter(task => task.status === 'concluido').length;
+
+    // Calcular a porcentagem de progresso
+    return Math.round((completedTasks / project.tasks.length) * 100);
   };
 
   // Função para navegar para a página de detalhes do projeto

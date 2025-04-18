@@ -205,7 +205,10 @@ const Projects = () => {
     }
 
     // Contar tarefas concluídas
-    const completedTasks = tasks.filter(task => task.status === 'completed').length;
+    const completedTasks = tasks.filter(task => task.status === 'concluido').length;
+
+    // Log para depuração
+    console.log('Tarefas totais:', tasks.length, 'Concluídas:', completedTasks, 'Status das tarefas:', tasks.map(t => t.status));
 
     // Calcular a porcentagem de progresso
     return Math.round((completedTasks / tasks.length) * 100);
