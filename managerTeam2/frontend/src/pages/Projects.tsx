@@ -34,7 +34,7 @@ interface UIProject extends Project {
   members?: number[];
   statusText?: string; // Propriedade para armazenar o status como texto
 }
-import { taskService } from '@/lib/api';
+import { taskService, userService, teamService } from '@/lib/api';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -65,30 +65,59 @@ const Projects = () => {
       const projectsData = await projectService.getProjects();
       setProjects(projectsData);
 
-      // Carregar contagem de tarefas para cada projeto
+      // Carregar tarefas para os primeiros 3 projetos para melhorar a experiência inicial
       const taskCounts: Record<number, number> = {};
-      for (const project of projectsData) {
-        try {
-          const tasks = await taskService.getTasksByProject(project.id);
-          taskCounts[project.id] = tasks.length;
-        } catch (err) {
-          console.error(`Erro ao carregar tarefas do projeto ${project.id}:`, err);
-          taskCounts[project.id] = 0;
+      const tasksPromises = [];
+
+      // Limitar o número de requisições iniciais
+      const initialProjects = projectsData.slice(0, 3);
+
+      for (const project of initialProjects) {
+        if (project.id) {
+          const promise = taskService.getTasksByProject(project.id)
+            .then(tasks => {
+              // Atualizar o cache de tarefas
+              setProjectTasksData(prev => ({
+                ...prev,
+                [project.id]: tasks
+              }));
+
+              // Atualizar a contagem de tarefas
+              taskCounts[project.id] = tasks.length;
+            })
+            .catch(err => {
+              console.error(`Erro ao carregar tarefas do projeto ${project.id}:`, err);
+              taskCounts[project.id] = 0;
+            });
+
+          tasksPromises.push(promise);
         }
       }
 
+      // Aguardar todas as requisições de tarefas iniciais
+      await Promise.all(tasksPromises);
       setProjectTasks(taskCounts);
 
-      // Temporariamente, ainda carregamos dados do localStorage para equipes e usuários
-      // até que esses endpoints sejam implementados
-      const storedTeams = localStorage.getItem('teams');
-      if (storedTeams) {
-        setTeams(JSON.parse(storedTeams));
-      }
+      // Carregar equipes e usuários da API
+      try {
+        const teamsData = await teamService.getTeams();
+        setTeams(teamsData);
 
-      const storedUsers = localStorage.getItem('users');
-      if (storedUsers) {
-        setUsers(JSON.parse(storedUsers));
+        const usersData = await userService.getUsers();
+        setUsers(usersData);
+      } catch (err) {
+        console.error('Erro ao carregar equipes ou usuários:', err);
+
+        // Fallback para dados do localStorage
+        const storedTeams = localStorage.getItem('teams');
+        if (storedTeams) {
+          setTeams(JSON.parse(storedTeams));
+        }
+
+        const storedUsers = localStorage.getItem('users');
+        if (storedUsers) {
+          setUsers(JSON.parse(storedUsers));
+        }
       }
     } catch (err) {
       console.error('Erro ao carregar projetos:', err);
@@ -109,27 +138,7 @@ const Projects = () => {
   }, []);
 
   // Carregar tarefas para todos os projetos quando o componente é montado
-  useEffect(() => {
-    const loadAllProjectTasks = async () => {
-      if (projects.length > 0) {
-        for (const project of projects) {
-          if (project.id && !projectTasksData[project.id]) {
-            try {
-              const tasks = await taskService.getTasksByProject(project.id);
-              setProjectTasksData(prev => ({
-                ...prev,
-                [project.id]: tasks
-              }));
-            } catch (err) {
-              console.error(`Erro ao carregar tarefas do projeto ${project.id}:`, err);
-            }
-          }
-        }
-      }
-    };
-
-    loadAllProjectTasks();
-  }, [projects]);
+  // Este useEffect foi removido para evitar requisições duplicadas
 
   const handleAddProject = async () => {
     // Fechar o diálogo e recarregar os projetos
@@ -161,17 +170,9 @@ const Projects = () => {
 
     setSelectedProject(projectCopy);
 
-    // Carregar tarefas do projeto
-    if (project.id && !projectTasksData[project.id]) {
-      try {
-        const tasks = await taskService.getTasksByProject(project.id);
-        setProjectTasksData(prev => ({
-          ...prev,
-          [project.id]: tasks
-        }));
-      } catch (err) {
-        console.error(`Erro ao carregar tarefas do projeto ${project.id}:`, err);
-      }
+    // Carregar tarefas do projeto usando a função loadProjectTasks
+    if (project.id) {
+      await loadProjectTasks(project.id);
     }
 
     setIsViewProjectOpen(true);
@@ -211,29 +212,24 @@ const Projects = () => {
     return Math.round((completedTasks / tasks.length) * 100);
   };
 
-  // Carregar tarefas para todos os projetos quando o componente é montado
-  useEffect(() => {
-    // Pré-carregar tarefas para todos os projetos para melhorar a experiência do usuário
-    const preloadProjectTasks = async () => {
-      for (const project of projects) {
-        if (project.id && !projectTasksData[project.id]) {
-          try {
-            const tasks = await taskService.getTasksByProject(project.id);
-            setProjectTasksData(prev => ({
-              ...prev,
-              [project.id]: tasks
-            }));
-          } catch (err) {
-            console.error(`Erro ao carregar tarefas do projeto ${project.id}:`, err);
-          }
-        }
+  // Carregar tarefas sob demanda
+  const loadProjectTasks = async (projectId: number) => {
+    if (!projectTasksData[projectId]) {
+      try {
+        console.log(`Carregando tarefas para o projeto ${projectId}`);
+        const tasks = await taskService.getTasksByProject(projectId);
+        setProjectTasksData(prev => ({
+          ...prev,
+          [projectId]: tasks
+        }));
+        return tasks;
+      } catch (err) {
+        console.error(`Erro ao carregar tarefas do projeto ${projectId}:`, err);
+        return [];
       }
-    };
-
-    if (projects.length > 0) {
-      preloadProjectTasks();
     }
-  }, [projects, projectTasksData]);
+    return projectTasksData[projectId];
+  };
 
   // Função para calcular o progresso do projeto
   const calculateProjectProgress = (project: UIProject) => {

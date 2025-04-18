@@ -80,15 +80,9 @@ api.interceptors.response.use(
       window.location.href = '/login';
     }
 
-    // Se o erro for 404 (não encontrado) para o endpoint /me, tente usar /user
-    if (error.response && error.response.status === 404 && error.config.url === '/me') {
-      console.warn('Endpoint /me não encontrado, tentando /user');
-      try {
-        return api.get('/user');
-      } catch (userError) {
-        console.error('Erro ao tentar endpoint alternativo /user:', userError);
-        return Promise.reject(userError);
-      }
+    // Tratamento de erros específicos
+    if (error.response && error.response.status === 404) {
+      console.error(`Endpoint ${error.config.url} não encontrado`);
     }
 
     return Promise.reject(error);

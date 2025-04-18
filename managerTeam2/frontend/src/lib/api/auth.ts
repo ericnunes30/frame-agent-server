@@ -60,9 +60,21 @@ const authService = {
   // Obtém o usuário atual
   getCurrentUser: async () => {
     try {
-      // Tenta obter o usuário da API
-      const response = await api.get<User>('/me');
-      if (response.data && response.data.id) {
+      // Tenta obter o usuário da API usando o endpoint /user
+      const response = await api.get<User>('/user');
+      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+        // Se a resposta for um array, encontre o usuário pelo ID armazenado no localStorage
+        const userId = localStorage.getItem('user_id');
+        if (userId) {
+          const user = response.data.find(u => u.id === parseInt(userId));
+          if (user) {
+            return user;
+          }
+        }
+        // Se não encontrar o usuário específico, retorne o primeiro usuário do array
+        return response.data[0];
+      } else if (response.data && !Array.isArray(response.data) && response.data.id) {
+        // Se a resposta for um único objeto de usuário
         return response.data;
       }
 
