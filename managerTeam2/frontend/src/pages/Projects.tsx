@@ -190,9 +190,6 @@ const Projects = () => {
   // Função para carregar tarefas de um projeto específico
   const [projectTasksData, setProjectTasksData] = useState<Record<number, any[]>>({});
 
-  // Cache para armazenar o progresso calculado de cada projeto
-  const [projectProgressCache, setProjectProgressCache] = useState<Record<number, number>>({});
-
   // Obter tarefas de um projeto
   const getProjectTasks = (projectId: number) => {
     return projectTasksData[projectId] || [];
@@ -214,38 +211,41 @@ const Projects = () => {
     return Math.round((completedTasks / tasks.length) * 100);
   };
 
-  // Atualizar o cache de progresso quando as tarefas são carregadas
+  // Carregar tarefas para todos os projetos quando o componente é montado
   useEffect(() => {
-    const updateProgressCache = () => {
-      const newCache: Record<number, number> = {};
-
-      // Calcular o progresso para cada projeto com tarefas carregadas
-      Object.entries(projectTasksData).forEach(([projectId, tasks]) => {
-        const numericId = Number(projectId);
-        newCache[numericId] = calculateProgress(tasks);
-      });
-
-      // Atualizar o cache apenas se houver mudanças
-      if (Object.keys(newCache).length > 0) {
-        setProjectProgressCache(prev => ({
-          ...prev,
-          ...newCache
-        }));
+    // Pré-carregar tarefas para todos os projetos para melhorar a experiência do usuário
+    const preloadProjectTasks = async () => {
+      for (const project of projects) {
+        if (project.id && !projectTasksData[project.id]) {
+          try {
+            const tasks = await taskService.getTasksByProject(project.id);
+            setProjectTasksData(prev => ({
+              ...prev,
+              [project.id]: tasks
+            }));
+          } catch (err) {
+            console.error(`Erro ao carregar tarefas do projeto ${project.id}:`, err);
+          }
+        }
       }
     };
 
-    updateProgressCache();
-  }, [projectTasksData]);
+    if (projects.length > 0) {
+      preloadProjectTasks();
+    }
+  }, [projects, projectTasksData]);
 
-  // Função segura para obter o progresso do projeto
+  // Função para calcular o progresso do projeto
   const calculateProjectProgress = (project: UIProject) => {
-    // Se o progresso já estiver em cache, retornar o valor em cache
-    if (projectProgressCache[project.id]) {
-      return projectProgressCache[project.id];
+    // Sempre calcular o progresso com base nas tarefas do projeto
+    const tasks = getProjectTasks(project.id);
+
+    // Se o projeto tem a propriedade tasks diretamente, usar isso também
+    if (project.tasks && Array.isArray(project.tasks) && project.tasks.length > 0) {
+      const completedTasks = project.tasks.filter(task => task.status === 'concluido').length;
+      return Math.round((completedTasks / project.tasks.length) * 100);
     }
 
-    // Se não estiver em cache, calcular sem atualizar o estado
-    const tasks = getProjectTasks(project.id);
     return calculateProgress(tasks);
   };
 
