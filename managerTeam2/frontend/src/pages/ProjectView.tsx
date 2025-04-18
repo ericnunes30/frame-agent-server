@@ -39,12 +39,16 @@ const ProjectView = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const tasksListRef = React.useRef<{ fetchTasks: () => Promise<void> }>(null);
 
+  // Referência para o componente KanbanBoard
+  const kanbanBoardRef = React.useRef<{ fetchTasks: () => Promise<void> }>(null);
+
   useEffect(() => {
     const fetchProjectData = async () => {
       if (!projectId) return;
 
       setIsLoading(true);
       setError(null);
+      console.log(`Carregando dados do projeto ID: ${projectId}`);
 
       try {
         // Converter projectId para número
@@ -58,6 +62,7 @@ const ProjectView = () => {
 
         // Carregar tarefas do projeto
         const projectTasks = await taskService.getTasksByProject(id);
+        console.log(`Tarefas carregadas para o projeto ${id}:`, projectTasks.length);
         setTasks(projectTasks);
 
         // Calcular progresso com base nas tarefas concluídas
@@ -114,6 +119,24 @@ const ProjectView = () => {
     };
 
     fetchProjectData();
+  }, [projectId]);
+
+  // Efeito para atualizar os componentes KanbanBoard e TasksList quando o projectId mudar
+  useEffect(() => {
+    // Pequeno atraso para garantir que os componentes estejam montados
+    const timer = setTimeout(() => {
+      if (kanbanBoardRef.current) {
+        console.log('Atualizando KanbanBoard para o projeto:', projectId);
+        kanbanBoardRef.current.fetchTasks();
+      }
+
+      if (tasksListRef.current) {
+        console.log('Atualizando TasksList para o projeto:', projectId);
+        tasksListRef.current.fetchTasks();
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
   }, [projectId]);
 
   if (isLoading) {
@@ -513,6 +536,7 @@ const ProjectView = () => {
             <TabsContent value="kanban" className="mt-6">
               <div className="px-5">
                 <KanbanBoard
+                  ref={kanbanBoardRef}
                   projectId={parseInt(projectId || '0')}
                   teams={projectTeams}
                   selectedTeamId={selectedTeamId}
