@@ -4,12 +4,24 @@ import { createTaskValidator, updateTaskValidator } from '#validators/task'
 import Task from '#models/task'
 
 export default class TasksController {
-    async index({}: HttpContext) {
-        // Retorna todas as tarefas com seus relacionamentos
-        const tasks = await Task.query()
+    async index({ request }: HttpContext) {
+        // Verificar se há um filtro por projectId
+        const projectId = request.input('projectId')
+
+        // Iniciar a consulta
+        let query = Task.query()
             .preload('project')
             .preload('users')
             .preload('occupations')
+
+        // Aplicar filtro por projeto se o projectId for fornecido
+        if (projectId) {
+            console.log(`Filtrando tarefas por projeto ID: ${projectId}`)
+            query = query.where('project_id', projectId)
+        }
+
+        // Executar a consulta
+        const tasks = await query
         return tasks
     }
 
