@@ -24,7 +24,10 @@ export default class TasksController {
   }
 
   async store({ request, auth }: HttpContext) {
+    console.log('🔍 TaskController.store - Raw request body:', request.body())
+
     const data = await request.validateUsing(createTaskValidator)
+    console.log('🔍 TaskController.store - Validated data:', data)
 
     const {
       title,
@@ -45,7 +48,13 @@ export default class TasksController {
       occupations,
     } = data
 
-    const task = await Task.create({
+    console.log('🔍 TaskController.store - Extracted fields:')
+    console.log('  - has_detailed_fields:', has_detailed_fields)
+    console.log('  - video_url:', video_url)
+    console.log('  - useful_links:', useful_links)
+    console.log('  - observations:', observations)
+
+    const taskCreateData = {
       title,
       description,
       priority,
@@ -54,13 +63,19 @@ export default class TasksController {
       due_date,
       project_id,
       order,
-      timer: timer || 0, // Usa o valor fornecido ou 0 como padrão
+      timer: timer || 0,
       task_reviewer_id,
       video_url,
       useful_links: useful_links ? JSON.stringify(useful_links) : null,
       observations,
       has_detailed_fields: has_detailed_fields || false,
-    } as any)
+    }
+
+    console.log('🔍 TaskController.store - Task create data:', taskCreateData)
+
+    const task = await Task.create(taskCreateData as any)
+    console.log('🔍 TaskController.store - Task created successfully with ID:', task.id)
+    console.log('🔍 TaskController.store - Created task data:', task.toJSON())
 
     if (users && users.length > 0) {
       await task.related('users').attach(users)
@@ -113,6 +128,7 @@ export default class TasksController {
       })
     }
 
+    console.log('🚀 TaskController.store - Final task object before return:', task.toJSON())
     return task
   }
 
@@ -163,6 +179,7 @@ export default class TasksController {
   async update({ request, params, response, auth }: HttpContext) {
     // 1. Adicionar auth
     try {
+      console.log('🔍 TaskController.update - Raw request body:', request.body())
       const actingUserId = auth.user!.id // 2. Definir actingUserId
       const taskId = params.id
 
@@ -187,8 +204,10 @@ export default class TasksController {
       // Neste ponto, 'task' ainda é a instância original.
       // 'originalTaskState' e 'originalUserIds' guardam os valores antes da validação e do merge.
       const data = await request.validateUsing(updateTaskValidator)
+      console.log('🔍 TaskController.update - Validated data:', data)
 
       task.merge(data as any)
+      console.log('🔍 TaskController.update - Task after merge:', task.toJSON())
       await task.save()
 
       if (data.users && data.users.length > 0) {
