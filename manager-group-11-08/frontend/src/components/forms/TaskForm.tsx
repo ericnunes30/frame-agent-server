@@ -186,6 +186,11 @@ export const TaskForm = React.forwardRef<TaskFormRef, TaskFormProps>(
           project_id: formattedValues.project_id, // Garante que o nome do campo é 'project_id'
           users: formattedValues.users,
           occupations: formattedValues.occupations,
+          // Novos campos detalhados
+          has_detailed_fields: values.has_detailed_fields,
+          video_url: values.video_url || null,
+          useful_links: values.useful_links?.length ? values.useful_links : null,
+          observations: values.observations || null,
           // Não salvamos order aqui, pois só muda no kanban drag/drop
         };
       }
@@ -514,7 +519,12 @@ export const TaskForm = React.forwardRef<TaskFormRef, TaskFormProps>(
         task_reviewer_id: formattedValues.task_reviewer_id,
         users: formattedValues.users,
         occupations: formattedValues.occupations,
-        order: values.order
+        order: values.order,
+        // Novos campos detalhados
+        has_detailed_fields: values.has_detailed_fields,
+        video_url: values.video_url || null,
+        useful_links: values.useful_links?.length ? values.useful_links : null,
+        observations: values.observations || null
       };
     }
 
