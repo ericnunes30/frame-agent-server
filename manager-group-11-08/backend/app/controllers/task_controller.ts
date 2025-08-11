@@ -57,7 +57,7 @@ export default class TasksController {
       timer: timer || 0, // Usa o valor fornecido ou 0 como padrão
       task_reviewer_id,
       video_url,
-      useful_links,
+      useful_links: useful_links ? JSON.stringify(useful_links) : null,
       observations,
       has_detailed_fields: has_detailed_fields || false,
     } as any)
