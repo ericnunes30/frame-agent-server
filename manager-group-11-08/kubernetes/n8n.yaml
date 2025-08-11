@@ -1,0 +1,159 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: n8n-pvc
+  namespace: n8n
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n8n
+  namespace: n8n
+  labels:
+    app: n8n
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: n8n
+  template:
+    metadata:
+      labels:
+        app: n8n
+    spec:
+      initContainers:
+      - name: fix-permissions
+        image: busybox
+        command: ['sh', '-c', 'chown -R 1000:1000 /home/node/.n8n && chmod -R 755 /home/node/.n8n']
+        volumeMounts:
+        - name: n8n-storage
+          mountPath: /home/node/.n8n
+      containers:
+      - name: n8n
+        image: n8nio/n8n:1.80.1
+        ports:
+        - containerPort: 5678
+        env:
+        - name: DB_TYPE
+          value: "postgresdb"
+        - name: DB_POSTGRESDB_HOST
+          value: "postgres-service.postgres.svc.cluster.local"
+        - name: DB_POSTGRESDB_PORT
+          value: "5432"
+        - name: DB_POSTGRESDB_DATABASE
+          value: "n8n_queue"
+        - name: DB_POSTGRESDB_USER
+          value: "postgres"
+        - name: DB_POSTGRESDB_PASSWORD
+          value: "5c36692ddf14070fad66b79690df4d47"
+        - name: QUEUE_BULL_REDIS_HOST
+          value: "redis-service.redis.svc.cluster.local"
+        - name: QUEUE_BULL_REDIS_PORT
+          value: "6379"
+        - name: QUEUE_BULL_REDIS_DB
+          value: "2"
+        - name: EXECUTIONS_MODE
+          value: "queue"
+        - name: N8N_ENCRYPTION_KEY
+          value: "e11547420cffa1235d408c2e3d638b12"
+        - name: N8N_EDITOR_BASE_URL
+          value: "https://workflow.surrealgroup.com.br/"
+        - name: N8N_HOST
+          value: "workflow.surrealgroup.com.br"
+        - name: N8N_PROTOCOL
+          value: "https"
+        - name: WEBHOOK_URL
+          value: "https://webhook.surrealgroup.com.br/"
+        - name: GENERIC_TIMEZONE
+          value: "America/Sao_Paulo"
+        - name: TZ
+          value: "America/Sao_Paulo"
+        - name: NODE_ENV
+          value: "production"
+        - name: N8N_COMMUNITY_PACKAGES_ENABLED
+          value: "true"
+        - name: EXECUTIONS_DATA_MAX_AGE
+          value: "336"
+        - name: EXECUTIONS_DATA_PRUNE
+          value: "true"
+        - name: N8N_NODE_PATH
+          value: "/home/node/.n8n/nodes"
+        - name: N8N_REINSTALL_MISSING_PACKAGES
+          value: "true"
+        - name: NODE_FUNCTION_ALLOW_EXTERNAL
+          value: "moment,lodash"
+        - name: N8N_SMTP_HOST
+          value: "smtp-relay.brevo.com"
+        - name: N8N_SMTP_USER
+          value: "7bf822001@smtp-brevo.com"
+        - name: N8N_SMTP_PASS
+          value: "mpOTNUQsLHFY7K8B"
+        - name: N8N_SMTP_PORT
+          value: "587"
+        - name: N8N_SMTP_SENDER
+          value: "noreply@websitesurrealgroup.com.br"
+        - name: N8N_SMTP_SSL
+          value: "false"
+        volumeMounts:
+        - name: n8n-storage
+          mountPath: /home/node/.n8n
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+      volumes:
+      - name: n8n-storage
+        persistentVolumeClaim:
+          claimName: n8n-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: n8n-service
+  namespace: n8n
+  labels:
+    app: n8n
+spec:
+  ports:
+  - port: 5678
+    targetPort: 5678
+    protocol: TCP
+  selector:
+    app: n8n
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: n8n-ingress
+  namespace: n8n
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+  - hosts:
+    - workflow.surrealgroup.com.br
+    secretName: n8n-tls
+  rules:
+  - host: workflow.surrealgroup.com.br
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: n8n-service
+            port:
+              number: 5678

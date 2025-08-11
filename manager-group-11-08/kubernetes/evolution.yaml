@@ -1,0 +1,184 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: evolution-pvc
+  namespace: evolution
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: evolution
+  namespace: evolution
+  labels:
+    app: evolution
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: evolution
+  template:
+    metadata:
+      labels:
+        app: evolution
+    spec:
+      containers:
+      - name: evolution
+        image: atendai/evolution-api:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: AUTHENTICATION_API_KEY
+          value: "197224b5d3adcc667275d0c473a0fa4f"
+        - name: AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES
+          value: "true"
+        - name: DATABASE_ENABLED
+          value: "true"
+        - name: DATABASE_PROVIDER
+          value: "postgresql"
+        - name: DATABASE_CONNECTION_URI
+          value: "postgresql://postgres:5c36692ddf14070fad66b79690df4d47@postgres-service.postgres.svc.cluster.local:5432/evolution"
+        - name: DATABASE_CONNECTION_CLIENT_NAME
+          value: "evolution"
+        - name: DATABASE_SAVE_DATA_INSTANCE
+          value: "true"
+        - name: DATABASE_SAVE_DATA_NEW_MESSAGE
+          value: "true"
+        - name: DATABASE_SAVE_MESSAGE_UPDATE
+          value: "true"
+        - name: DATABASE_SAVE_DATA_CONTACTS
+          value: "true"
+        - name: DATABASE_SAVE_DATA_CHATS
+          value: "true"
+        - name: DATABASE_SAVE_DATA_LABELS
+          value: "true"
+        - name: DATABASE_SAVE_DATA_HISTORIC
+          value: "true"
+        - name: CACHE_REDIS_ENABLED
+          value: "true"
+        - name: CACHE_REDIS_URI
+          value: "redis://redis-service.redis.svc.cluster.local:6379/8"
+        - name: CACHE_REDIS_PREFIX_KEY
+          value: "evolution"
+        - name: CACHE_REDIS_SAVE_INSTANCES
+          value: "false"
+        - name: CACHE_LOCAL_ENABLED
+          value: "false"
+        - name: SERVER_URL
+          value: "https://evolutionapi.surrealgroup.com.br"
+        - name: LANGUAGE
+          value: "pt-BR"
+        - name: DEL_INSTANCE
+          value: "false"
+        - name: CONFIG_SESSION_PHONE_CLIENT
+          value: "OrionDesign"
+        - name: CONFIG_SESSION_PHONE_NAME
+          value: "Chrome"
+        - name: CONFIG_SESSION_PHONE_VERSION
+          value: "2.3000.1019673114"
+        - name: QRCODE_LIMIT
+          value: "1902"
+        - name: CHATWOOT_ENABLED
+          value: "true"
+        - name: CHATWOOT_MESSAGE_DELETE
+          value: "true"
+        - name: CHATWOOT_MESSAGE_READ
+          value: "true"
+        - name: CHATWOOT_IMPORT_PLACEHOLDER_MEDIA_MESSAGE
+          value: "false"
+        - name: DIFY_ENABLED
+          value: "true"
+        - name: OPENAI_ENABLED
+          value: "true"
+        - name: TYPEBOT_ENABLED
+          value: "true"
+        - name: TYPEBOT_API_VERSION
+          value: "latest"
+        - name: WA_BUSINESS_LANGUAGE
+          value: "pt_BR"
+        - name: WA_BUSINESS_TOKEN_WEBHOOK
+          value: "evolution"
+        - name: WA_BUSINESS_URL
+          value: "https://graph.facebook.com"
+        - name: WA_BUSINESS_VERSION
+          value: "v20.0"
+        - name: TELEMETRY
+          value: "false"
+        - name: RABBITMQ_ENABLED
+          value: "false"
+        - name: RABBITMQ_GLOBAL_ENABLED
+          value: "false"
+        - name: WEBHOOK_GLOBAL_ENABLED
+          value: "false"
+        - name: WEBSOCKET_ENABLED
+          value: "false"
+        - name: WEBSOCKET_GLOBAL_EVENTS
+          value: "false"
+        - name: PROVIDER_ENABLED
+          value: "false"
+        - name: S3_ENABLED
+          value: "false"
+        - name: SQS_ENABLED
+          value: "false"
+        volumeMounts:
+        - name: evolution-storage
+          mountPath: /evolution/instances
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+      volumes:
+      - name: evolution-storage
+        persistentVolumeClaim:
+          claimName: evolution-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: evolution-service
+  namespace: evolution
+  labels:
+    app: evolution
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: evolution
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: evolution-ingress
+  namespace: evolution
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+  - hosts:
+    - evolutionapi.surrealgroup.com.br
+    secretName: evolution-tls
+  rules:
+  - host: evolutionapi.surrealgroup.com.br
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: evolution-service
+            port:
+              number: 8080

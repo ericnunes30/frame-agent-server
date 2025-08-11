@@ -499,10 +499,6 @@ export const TaskForm = React.forwardRef<TaskFormRef, TaskFormProps>(
       task_reviewer_id: values.task_reviewer_id
     };
 
-    // Log de debug para verificar os valores
-    console.log('🔍 TaskForm onSubmit - values:', values);
-    console.log('🔍 TaskForm onSubmit - formattedValues:', formattedValues);
-
     // Se o usuário for um membro e estiver em modo de edição, permitir apenas atualizar status e comentário
     let apiValues;
 
@@ -531,8 +527,6 @@ export const TaskForm = React.forwardRef<TaskFormRef, TaskFormProps>(
         observations: values.observations && values.observations.trim() !== '' ? values.observations.trim() : null
       };
     }
-
-    console.log('🚀 TaskForm onSubmit - apiValues:', apiValues);
 
     if (isEditMode && initialData?.id) {
       updateTaskMutation(

@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  # Serviço do Banco de Dados com as suas configurações
+  db:
+    image: postgres:15-alpine
+    container_name: manager-group-db
+    restart: always
+    environment:
+      POSTGRES_DB: manager_group_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: '123456' # Usar aspas se a senha tiver caracteres especiais
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  # Serviço do Backend com as suas variáveis de ambiente
+  backend:
+    container_name: manager-group-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3333:3333"
+    environment:
+      # --- Variáveis do seu .env ---
+      NODE_ENV: production
+      TZ: UTC
+      HOST: '0.0.0.0' # '0.0.0.0' para ser acessível externamente ao container
+      PORT: 3333
+      APP_KEY: 'GGotMrcDH66h1hQjsc8tX6KoEkMWdaxk'
+      LOG_LEVEL: info
+      # --- Configuração do Banco de Dados ---
+      DB_HOST: db # Nome do serviço do banco de dados
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: '123456'
+      DB_DATABASE: manager_group_test
+    depends_on:
+      - db
+
+  # Serviço do Frontend (sem alterações)
+  frontend:
+    container_name: manager-group-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_BACKEND_API_URL: http://localhost:3333
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: manager-group-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  event-relay-service:
+    container_name: manager-group-event-relay
+    build:
+      context: ./event-relay-service
+      dockerfile: Dockerfile
+    environment:
+      - DB_HOST=db
+    env_file:
+      - ./event-relay-service/.env
+    depends_on:
+      - db
+      - rabbitmq
+
+  scheduler-service:
+    container_name: manager-group-scheduler
+    build:
+      context: ./scheduler-service
+      dockerfile: Dockerfile
+    environment:
+      - DB_HOST=db
+      - BACKEND_API_URL=http://backend:3333
+    env_file:
+      - ./scheduler-service/.env
+    depends_on:
+      - backend
+      - rabbitmq
+
+volumes:
+  pg_data:
+  rabbitmq_data:
