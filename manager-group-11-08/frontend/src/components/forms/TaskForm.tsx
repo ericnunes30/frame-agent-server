@@ -187,10 +187,10 @@ export const TaskForm = React.forwardRef<TaskFormRef, TaskFormProps>(
           users: formattedValues.users,
           occupations: formattedValues.occupations,
           // Novos campos detalhados
-          has_detailed_fields: values.has_detailed_fields,
-          video_url: values.video_url || null,
-          useful_links: values.useful_links?.length ? values.useful_links : null,
-          observations: values.observations || null,
+          has_detailed_fields: Boolean(values.has_detailed_fields),
+          video_url: values.video_url && values.video_url.trim() !== '' ? values.video_url.trim() : null,
+          useful_links: values.useful_links && values.useful_links.length > 0 && values.useful_links.some(link => link.title.trim() || link.url.trim()) ? values.useful_links.filter(link => link.title.trim() && link.url.trim()) : null,
+          observations: values.observations && values.observations.trim() !== '' ? values.observations.trim() : null,
           // Não salvamos order aqui, pois só muda no kanban drag/drop
         };
       }
@@ -499,6 +499,10 @@ export const TaskForm = React.forwardRef<TaskFormRef, TaskFormProps>(
       task_reviewer_id: values.task_reviewer_id
     };
 
+    // Log de debug para verificar os valores
+    console.log('🔍 TaskForm onSubmit - values:', values);
+    console.log('🔍 TaskForm onSubmit - formattedValues:', formattedValues);
+
     // Se o usuário for um membro e estiver em modo de edição, permitir apenas atualizar status e comentário
     let apiValues;
 
@@ -521,12 +525,14 @@ export const TaskForm = React.forwardRef<TaskFormRef, TaskFormProps>(
         occupations: formattedValues.occupations,
         order: values.order,
         // Novos campos detalhados
-        has_detailed_fields: values.has_detailed_fields,
-        video_url: values.video_url || null,
-        useful_links: values.useful_links?.length ? values.useful_links : null,
-        observations: values.observations || null
+        has_detailed_fields: Boolean(values.has_detailed_fields),
+        video_url: values.video_url && values.video_url.trim() !== '' ? values.video_url.trim() : null,
+        useful_links: values.useful_links && values.useful_links.length > 0 && values.useful_links.some(link => link.title.trim() || link.url.trim()) ? values.useful_links.filter(link => link.title.trim() && link.url.trim()) : null,
+        observations: values.observations && values.observations.trim() !== '' ? values.observations.trim() : null
       };
     }
+
+    console.log('🚀 TaskForm onSubmit - apiValues:', apiValues);
 
     if (isEditMode && initialData?.id) {
       updateTaskMutation(
