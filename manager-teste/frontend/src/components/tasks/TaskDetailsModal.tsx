@@ -1553,21 +1553,6 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                   )}
                 </div>
               )}
-              
-              {/* Botão Ver Detalhes */}
-              {task.has_detailed_fields && (
-                <div className="mt-3">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setShowDetailsPopup(true)}
-                    className="flex items-center gap-2"
-                  >
-                    <FileText className="h-4 w-4" />
-                    Ver Detalhes
-                  </Button>
-                </div>
-              )}
             </div>
 
             <Separator className="my-4" />
@@ -1855,16 +1840,8 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
             ) : (
               <div className="flex-1">
                 {task.has_detailed_fields ? (
-                  <div className="text-sm">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => setShowDetailsPopup(true)}
-                      className="flex items-center gap-2"
-                    >
-                      <FileText className="h-4 w-4" />
-                      Ver Detalhes
-                    </Button>
+                  <div className="text-sm text-muted-foreground">
+                    Campos detalhados ativados - edite acima para modificar
                   </div>
                 ) : (
                   <div className="text-sm text-muted-foreground">
