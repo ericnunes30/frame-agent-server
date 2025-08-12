@@ -1769,7 +1769,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                         placeholder="https://www.youtube.com/watch?v=..."
                         value={editedTask.video_url !== undefined ? editedTask.video_url : (task.video_url || '')}
                         onChange={(e) => handleFieldChange('video_url', e.target.value)}
-                        className="w-full mt-1 border rounded-md px-2 py-1 text-sm"
+                        className="w-full mt-1 border rounded-md px-2 py-1 text-sm bg-white text-gray-900 placeholder:text-gray-500"
                       />
                     </div>
 
@@ -1780,7 +1780,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                         placeholder="Observações, requisitos técnicos, considerações especiais..."
                         value={editedTask.observations !== undefined ? editedTask.observations : (task.observations || '')}
                         onChange={(e) => handleFieldChange('observations', e.target.value)}
-                        className="w-full mt-1 border rounded-md px-2 py-1 text-sm min-h-[60px]"
+                        className="w-full mt-1 border rounded-md px-2 py-1 text-sm min-h-[60px] bg-white text-gray-900 placeholder:text-gray-500"
                       />
                     </div>
 
@@ -1804,7 +1804,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                                   newLinks[index] = { ...newLinks[index], title: e.target.value };
                                   handleFieldChange('useful_links', newLinks);
                                 }}
-                                className="w-full border rounded-md px-2 py-1 text-sm mb-2"
+                                className="w-full border rounded-md px-2 py-1 text-sm mb-2 bg-white text-gray-900 placeholder:text-gray-500"
                               />
                               <input
                                 type="url"
@@ -1816,7 +1816,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                                   newLinks[index] = { ...newLinks[index], url: e.target.value };
                                   handleFieldChange('useful_links', newLinks);
                                 }}
-                                className="w-full border rounded-md px-2 py-1 text-sm"
+                                className="w-full border rounded-md px-2 py-1 text-sm bg-white text-gray-900 placeholder:text-gray-500"
                               />
                             </div>
                             <button
