@@ -1728,7 +1728,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
               <FileText className="h-4 w-4 text-muted-foreground" />
             </div>
             <div className="w-28">
-              <div className="text-sm font-medium">Campos Detalhados</div>
+              <div className="text-sm font-medium">Detalhes Adicionais</div>
             </div>
             {isEditMode && !permissions.isMember ? (
               <div className="flex-1 space-y-4">
@@ -1840,12 +1840,20 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
             ) : (
               <div className="flex-1">
                 {task.has_detailed_fields ? (
-                  <div className="text-sm text-muted-foreground">
-                    Campos detalhados ativados - edite acima para modificar
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setShowDetailsPopup(true)}
+                      className="flex items-center gap-1 h-7 px-2 text-xs"
+                    >
+                      <FileText className="h-3 w-3" />
+                      Ver detalhes
+                    </Button>
                   </div>
                 ) : (
                   <div className="text-sm text-muted-foreground">
-                    Campos detalhados não ativados
+                    Tarefa sem detalhes adicionais
                   </div>
                 )}
               </div>
