@@ -44,11 +44,13 @@ import {
   Clock,
   Copy,
   Edit,
+  ExternalLink,
   FileText,
   Heart, // Ícone de coração para curtidas
   History,
   ListOrdered,
   MessageSquare,
+  Plus,
   Send,
   Tag,
   ThumbsUp,
@@ -1784,9 +1786,67 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
 
                     {/* Links Úteis */}
                     <div>
-                      <label className="text-xs font-medium text-muted-foreground">Links Úteis</label>
+                      <label className="text-xs font-medium text-muted-foreground flex items-center gap-2">
+                        <ExternalLink className="h-3 w-3" />
+                        Links Úteis
+                      </label>
+                      <div className="mt-2 space-y-3">
+                        {(editedTask.useful_links !== undefined ? editedTask.useful_links : (task.useful_links || []))?.map((link, index) => (
+                          <div key={index} className="flex gap-2 items-end">
+                            <div className="flex-1">
+                              <input
+                                type="text"
+                                placeholder="Título do link"
+                                value={link.title || ''}
+                                onChange={(e) => {
+                                  const currentLinks = editedTask.useful_links !== undefined ? editedTask.useful_links : (task.useful_links || []);
+                                  const newLinks = [...currentLinks];
+                                  newLinks[index] = { ...newLinks[index], title: e.target.value };
+                                  handleFieldChange('useful_links', newLinks);
+                                }}
+                                className="w-full border rounded-md px-2 py-1 text-sm mb-2"
+                              />
+                              <input
+                                type="url"
+                                placeholder="https://..."
+                                value={link.url || ''}
+                                onChange={(e) => {
+                                  const currentLinks = editedTask.useful_links !== undefined ? editedTask.useful_links : (task.useful_links || []);
+                                  const newLinks = [...currentLinks];
+                                  newLinks[index] = { ...newLinks[index], url: e.target.value };
+                                  handleFieldChange('useful_links', newLinks);
+                                }}
+                                className="w-full border rounded-md px-2 py-1 text-sm"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const currentLinks = editedTask.useful_links !== undefined ? editedTask.useful_links : (task.useful_links || []);
+                                const newLinks = currentLinks.filter((_, i) => i !== index);
+                                handleFieldChange('useful_links', newLinks);
+                              }}
+                              className="border rounded-md px-2 py-1 text-sm hover:bg-muted/50 flex items-center"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const currentLinks = editedTask.useful_links !== undefined ? editedTask.useful_links : (task.useful_links || []);
+                            const newLinks = [...currentLinks, { title: '', url: '' }];
+                            handleFieldChange('useful_links', newLinks);
+                          }}
+                          className="w-full border rounded-md px-2 py-1 text-sm hover:bg-muted/50 flex items-center justify-center gap-2"
+                        >
+                          <Plus className="h-3 w-3" />
+                          Adicionar Link
+                        </button>
+                      </div>
                       <div className="mt-1 text-xs text-muted-foreground">
-                        Para editar links úteis, use o formulário completo da tarefa
+                        Links para recursos, documentação ou referências
                       </div>
                     </div>
                   </div>
