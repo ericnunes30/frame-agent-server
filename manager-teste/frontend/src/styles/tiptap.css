@@ -1,0 +1,102 @@
+/* Estilos para o TipTap Editor */
+
+.ProseMirror {
+  min-height: 100px; /* Garante uma altura mínima para o editor */
+  outline: none; /* Remove o outline padrão ao focar */
+  white-space: pre-wrap; /* Garante que o texto quebre corretamente */
+}
+
+/* Estilo para botões ativos na barra de ferramentas */
+.is-active {
+  background-color: var(--muted); /* Usa a cor muted do Shadcn/ui */
+  color: var(--foreground); /* Cor do texto para contraste */
+}
+
+/* Estilos básicos para o conteúdo gerado pelo TipTap quando não estiver em modo de edição */
+/* Isso complementa o plugin @tailwindcss/typography */
+.prose :where(h1, h2, h3, h4, h5, h6) {
+  margin-top: 1.2em;
+  margin-bottom: 0.8em;
+  font-weight: 600;
+}
+
+/* Estilos para o editor (ProseMirror) diretamente para cabeçalhos */
+.ProseMirror h1 { font-size: 2em !important; font-weight: bold !important; }
+.ProseMirror h2 { font-size: 1.5em !important; font-weight: bold !important; }
+.ProseMirror h3 { font-size: 1.17em !important; font-weight: bold !important; }
+
+/* Estilos para o conteúdo renderizado (prose) para cabeçalhos */
+.prose h1 { font-size: 2em !important; font-weight: bold !important; }
+.prose h2 { font-size: 1.5em !important; font-weight: bold !important; }
+.prose h3 { font-size: 1.17em !important; font-weight: bold !important; }
+
+.prose :where(ul, ol) {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  padding-left: 1.5em !important; /* Força a indentação */
+  list-style-position: outside !important; /* Garante que os marcadores fiquem fora do texto */
+}
+
+.prose :where(ul) {
+  list-style-type: disc !important; /* Marcadores de disco padrão para ul */
+}
+
+.prose :where(ol) {
+  list-style-type: decimal !important; /* Números decimais padrão para ol */
+}
+
+/* Estilos para o editor (ProseMirror) diretamente */
+.ProseMirror ul,
+.ProseMirror ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.ProseMirror ul {
+  list-style-type: disc;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal;
+}
+
+.ProseMirror li {
+  margin-left: 1em;
+}
+
+.prose :where(li) {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+.prose :where(a) {
+  color: var(--primary);
+  text-decoration: underline;
+  word-break: break-all; /* Garante que links longos quebrem a linha */
+}
+
+.prose :where(blockquote) {
+  border-left: 4px solid var(--border);
+  padding-left: 1em;
+  margin-left: 0;
+  font-style: italic;
+  color: var(--muted-foreground);
+}
+
+.prose :where(pre) {
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
+  padding: 1em;
+  border-radius: 0.375rem; /* rounded-md */
+  overflow-x: auto;
+}
+
+.prose :where(code) {
+  font-family: 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.875em;
+}
+
+.prose :where(p) {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}

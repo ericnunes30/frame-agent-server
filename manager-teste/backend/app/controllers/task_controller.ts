@@ -166,20 +166,11 @@ export default class TasksController {
   async update({ request, params, response, auth }: HttpContext) {
     // 1. Adicionar auth
     try {
-      console.log('=== TASK UPDATE DEBUG START ===')
-      console.log('Params received:', params)
-      console.log('Request body:', request.body())
-      
       const actingUserId = auth.user!.id // 2. Definir actingUserId
       const taskId = params.id
-      
-      console.log('Acting user ID:', actingUserId)
-      console.log('Task ID from params:', taskId, 'Type:', typeof taskId)
 
       // 3. Buscar o estado original da tarefa ANTES de qualquer modificação
-      console.log('Attempting to find task with ID:', taskId)
       const task = await Task.findByOrFail('id', taskId)
-      console.log('Task found successfully:', task.id, task.title)
       await task.load('users') // Carregar usuários para obter a lista original
 
       const originalTaskState = {
@@ -196,41 +187,27 @@ export default class TasksController {
         has_detailed_fields: task.has_detailed_fields,
       }
       const originalUserIds = task.users.map((u) => u.id).sort()
-      console.log('Original task state captured:', originalTaskState)
-      console.log('Original user IDs:', originalUserIds)
-      
       // Neste ponto, 'task' ainda é a instância original.
       // 'originalTaskState' e 'originalUserIds' guardam os valores antes da validação e do merge.
-      console.log('Validating request data...')
       const data = await request.validateUsing(updateTaskValidator)
-      console.log('Validation successful, data:', data)
 
-      console.log('Merging data into task...')
       task.merge(data as any)
-      console.log('Saving task...')
       await task.save()
-      console.log('Task saved successfully')
 
       if (data.users && data.users.length > 0) {
-        console.log('Syncing users:', data.users)
         await task.related('users').sync(data.users)
-        console.log('Users synced successfully')
       }
 
       if (data.occupations && data.occupations.length > 0) {
-        console.log('Syncing occupations:', data.occupations)
         await task.related('occupations').sync(data.occupations)
-        console.log('Occupations synced successfully')
       }
 
       // Recarregar a tarefa com seus relacionamentos para obter o estado final
-      console.log('Refreshing task and loading relationships...')
       await task.refresh() // Ensures `task` has the latest data from DB for direct fields
       await task.load('project') // Keep for response consistency
       await task.load('users') // Load users again to get the state after potential sync
       await task.load('occupations') // Keep for response consistency
       await task.load('reviewer')
-      console.log('Task refreshed and relationships loaded')
 
       // 4. Compare and Log changes
       const updatedTaskState = {
@@ -294,21 +271,12 @@ export default class TasksController {
       console.log('Tarefa atualizada e logs gerados (se houveram mudanças):', task.toJSON())
 
       // Preparar dados de resposta
-      console.log('Preparing response data...')
       const responseData = task.toJSON()
       responseData.timer = task.timer || 0 // Manter a lógica do timer
-      console.log('Response data prepared successfully')
-      console.log('=== TASK UPDATE DEBUG END ===')
 
       return responseData
     } catch (error) {
-      console.error('=== TASK UPDATE ERROR ===')
-      console.error('Error type:', error.constructor.name)
-      console.error('Error message:', error.message)
-      console.error('Error code:', error.code)
-      console.error('Full error:', error)
-      console.error('Stack trace:', error.stack)
-      console.error('=== TASK UPDATE ERROR END ===')
+      console.error('Erro ao atualizar tarefa:', error)
       return response.status(400).json({ error: 'Task not found!' })
     }
   }

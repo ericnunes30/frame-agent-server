@@ -197,7 +197,7 @@ export const TaskForm = React.forwardRef<TaskFormRef, TaskFormProps>(
           // Novos campos detalhados
           has_detailed_fields: Boolean(values.has_detailed_fields),
           video_url: values.video_url && values.video_url.trim() !== '' ? values.video_url.trim() : null,
-          useful_links: values.useful_links && values.useful_links.length > 0 && values.useful_links.some(link => link.title.trim() || link.url.trim()) ? values.useful_links.filter(link => link.title.trim() && link.url.trim()) : null,
+          useful_links: values.useful_links && values.useful_links.length > 0 && values.useful_links.some(link => link.title.trim() || link.url.trim()) ? JSON.stringify(values.useful_links.filter(link => link.title.trim() && link.url.trim())) : null,
           observations: values.observations && values.observations.trim() !== '' ? values.observations.trim() : null,
           // Não salvamos order aqui, pois só muda no kanban drag/drop
         };
@@ -531,7 +531,7 @@ export const TaskForm = React.forwardRef<TaskFormRef, TaskFormProps>(
         // Novos campos detalhados
         has_detailed_fields: Boolean(values.has_detailed_fields),
         video_url: values.video_url && values.video_url.trim() !== '' ? values.video_url.trim() : null,
-        useful_links: values.useful_links && values.useful_links.length > 0 && values.useful_links.some(link => link.title.trim() || link.url.trim()) ? values.useful_links.filter(link => link.title.trim() && link.url.trim()) : null,
+        useful_links: values.useful_links && values.useful_links.length > 0 && values.useful_links.some(link => link.title.trim() || link.url.trim()) ? JSON.stringify(values.useful_links.filter(link => link.title.trim() && link.url.trim())) : null,
         observations: values.observations && values.observations.trim() !== '' ? values.observations.trim() : null
       };
     }
