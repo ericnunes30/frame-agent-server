@@ -12,8 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   ExternalLink, 
   Video, 
-  FileText,
-  X
+  FileText
 } from "lucide-react";
 import { Task } from "@/common/types";
 
@@ -50,19 +49,9 @@ const TaskDetailsPopup: React.FC<TaskDetailsPopupProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[85vh] p-0">
         <DialogHeader className="p-6 pb-4">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-semibold">
-              Detalhes da Tarefa: {task.title}
-            </DialogTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="p-2 h-auto"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          <DialogTitle className="text-xl font-semibold">
+            Detalhes da Tarefa: {task.title}
+          </DialogTitle>
         </DialogHeader>
 
         <ScrollArea className="px-6 pb-6 max-h-[70vh]">
