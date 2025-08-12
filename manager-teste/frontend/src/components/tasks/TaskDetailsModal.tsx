@@ -1117,10 +1117,9 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
     }
 
     if (updatedFields.useful_links !== undefined) {
-      const filteredLinks = updatedFields.useful_links && updatedFields.useful_links.length > 0 && updatedFields.useful_links.some(link => link.title?.trim() || link.url?.trim()) 
+      taskData.useful_links = updatedFields.useful_links && updatedFields.useful_links.length > 0 && updatedFields.useful_links.some(link => link.title?.trim() || link.url?.trim()) 
         ? updatedFields.useful_links.filter(link => link.title?.trim() && link.url?.trim()) 
         : null;
-      taskData.useful_links = filteredLinks ? JSON.stringify(filteredLinks) : null;
     }
 
     if (updatedFields.observations !== undefined) {

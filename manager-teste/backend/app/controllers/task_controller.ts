@@ -191,6 +191,11 @@ export default class TasksController {
       // 'originalTaskState' e 'originalUserIds' guardam os valores antes da validação e do merge.
       const data = await request.validateUsing(updateTaskValidator)
 
+      // Processar useful_links para JSON string como no método store
+      if (data.useful_links !== undefined) {
+        data.useful_links = data.useful_links ? JSON.stringify(data.useful_links) : null
+      }
+
       task.merge(data as any)
       await task.save()
 
