@@ -1,6 +1,9 @@
 {
   "name": "@ericnunes/frame-agent-server",
   "version": "0.0.1",
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "dist",
     "README.md",
