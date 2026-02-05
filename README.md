@@ -19,6 +19,28 @@ This package provides a Fastify-based HTTP server that exposes `GraphEngine` ins
 npm install @ericnunes/frame-agent-server @ericnunes/frame-agent-sdk
 ```
 
+## Getting Started with Template
+
+The quickest way to start is by cloning the basic template from the repository:
+
+```bash
+# Clone the template
+git clone https://github.com/ericnunes/frame-agent-server.git temp
+cp -r temp/templates/basic meu-agente
+rm -rf temp
+
+# Install dependencies
+cd meu-agente
+npm install
+
+# Copy environment file
+cp .env.example .env
+# Edit .env with your OpenAI API key
+
+# Start development server
+npm run dev
+```
+
 ## Quick Start
 
 ```typescript
