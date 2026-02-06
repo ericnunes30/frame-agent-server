@@ -25,7 +25,7 @@ The quickest way to start is by cloning the basic template from the repository:
 
 ```bash
 # Clone the template
-git clone https://github.com/ericnunes/frame-agent-server.git temp
+git clone https://github.com/ericnunes30/frame-agent-server.git temp
 cp -r temp/templates/basic meu-agente
 rm -rf temp
 
