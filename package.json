@@ -37,12 +37,12 @@
   "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ericnunes/frame-agent-server.git"
+    "url": "git+https://github.com/ericnunes30/frame-agent-server.git"
   },
   "bugs": {
-    "url": "https://github.com/ericnunes/frame-agent-server/issues"
+    "url": "https://github.com/ericnunes30/frame-agent-server/issues"
   },
-  "homepage": "https://github.com/ericnunes/frame-agent-server#readme",
+  "homepage": "https://github.com/ericnunes30/frame-agent-server#readme",
   "peerDependencies": {
     "@ericnunes/frame-agent-sdk": "^0.0.6"
   },

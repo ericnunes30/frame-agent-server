@@ -2,12 +2,12 @@
   "name": "__PROJECT_NAME__",
   "version": "1.0.0",
   "description": "__PROJECT_NAME__ - Agent built with Frame Agent SDK",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/server.js",
+  "types": "dist/server.d.ts",
   "scripts": {
     "build": "tsc",
-    "dev": "tsx watch src/index.ts",
-    "start": "node dist/index.js",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "lint": "tsc --noEmit"
@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@ericnunes/frame-agent-sdk": "^0.0.6",
-    "@ericnunes/frame-agent-server": "^1.0.0",
+    "@ericnunes/frame-agent-server": "^0.0.1",
     "dotenv": "^16.4.0"
   },
   "devDependencies": {
